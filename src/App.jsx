@@ -1,4 +1,6 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+
+const STORAGE_KEY = "starbucks-egift-gifts";
 
 const STARBUCKS_GREEN = "#00704A";
 const DARK_GREEN = "#1E3932";
@@ -135,7 +137,16 @@ function UrlCheckModal({ url, onConfirm, onCancel }) {
 
 // ── メインアプリ ──────────────────────────────────────
 export default function App() {
-  const [gifts, setGifts] = useState([]);
+  const [gifts, setGifts] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(gifts));
+  }, [gifts]);
   const [tab, setTab] = useState("unused");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", amount: "", expiry: "", note: "", giftUrl: "" });
