@@ -43,92 +43,58 @@ function Field({ label, children }) {
   );
 }
 
-// ── URLプレビュー＆ステータス確認モーダル ──────────────────
+// ── ステータス確認モーダル（別タブでURL開いた後に表示）──────────────────
 function UrlCheckModal({ url, onConfirm, onCancel }) {
-  const [status, setStatus] = useState(null); // null | "unused" | "used"
+  const [status, setStatus] = useState(null);
 
   return (
     <div style={{
-      position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 50,
-      display: "flex", flexDirection: "column", alignItems: "stretch",
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 50,
+      display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
     }}>
-      {/* 上部：ステータス確認UI */}
-      <div style={{
-        background: DARK_GREEN, padding: "16px 20px",
-        display: "flex", flexDirection: "column", gap: 10,
-      }}>
-        <div style={{ color: "#fff", fontFamily: "sans-serif", fontWeight: 700, fontSize: 15 }}>
-          📋 ギフトの状態を確認してください
+      <div style={{ background: "#fff", borderRadius: 20, padding: 24, maxWidth: 360, width: "100%" }}>
+        <div style={{ fontWeight: "bold", fontSize: 17, color: DARK_GREEN, marginBottom: 6 }}>
+          📋 ギフトの状態を教えてください
         </div>
-        <div style={{ color: "rgba(255,255,255,0.7)", fontFamily: "sans-serif", fontSize: 12 }}>
-          下のページでギフトの使用状況を確認し、状態を選んでください
+        <div style={{ fontSize: 13, color: "#888", fontFamily: "sans-serif", marginBottom: 16 }}>
+          開いたページで使用状況を確認し、状態を選んでください
+        </div>
+        <a href={url} target="_blank" rel="noopener noreferrer" style={{
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+          background: CREAM, border: `1.5px solid ${GOLD}`, borderRadius: 10,
+          padding: "10px 0", marginBottom: 16, textDecoration: "none",
+          color: DARK_GREEN, fontFamily: "sans-serif", fontWeight: 600, fontSize: 13,
+        }}>
+          🔗 もう一度ページを開く ↗
+        </a>
+        <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+          <button onClick={() => setStatus("unused")} style={{
+            flex: 1, padding: "14px 0",
+            border: `2px solid ${status === "unused" ? STARBUCKS_GREEN : "#ddd"}`,
+            borderRadius: 12, background: status === "unused" ? STARBUCKS_GREEN : "#fff",
+            color: status === "unused" ? "#fff" : "#555",
+            fontFamily: "sans-serif", fontWeight: 700, fontSize: 15, cursor: "pointer",
+          }}>✅ 未使用</button>
+          <button onClick={() => setStatus("used")} style={{
+            flex: 1, padding: "14px 0",
+            border: `2px solid ${status === "used" ? "#e74c3c" : "#ddd"}`,
+            borderRadius: 12, background: status === "used" ? "#e74c3c" : "#fff",
+            color: status === "used" ? "#fff" : "#555",
+            fontFamily: "sans-serif", fontWeight: 700, fontSize: 15, cursor: "pointer",
+          }}>✗ 使用済み</button>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
-          <button
-            onClick={() => setStatus("unused")}
-            style={{
-              flex: 1, padding: "10px 0", border: `2px solid ${status === "unused" ? GOLD : "rgba(255,255,255,0.3)"}`,
-              borderRadius: 10, background: status === "unused" ? GOLD : "transparent",
-              color: "#fff", fontFamily: "sans-serif", fontWeight: 700, fontSize: 14, cursor: "pointer",
-            }}
-          >
-            ✅ 未使用
-          </button>
-          <button
-            onClick={() => setStatus("used")}
-            style={{
-              flex: 1, padding: "10px 0", border: `2px solid ${status === "used" ? "#e74c3c" : "rgba(255,255,255,0.3)"}`,
-              borderRadius: 10, background: status === "used" ? "#e74c3c" : "transparent",
-              color: "#fff", fontFamily: "sans-serif", fontWeight: 700, fontSize: 14, cursor: "pointer",
-            }}
-          >
-            ✗ 使用済み
-          </button>
-        </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button
-            onClick={onCancel}
-            style={{ ...btnStyle("rgba(255,255,255,0.15)", "#fff"), flex: 1, padding: "10px 0", fontSize: 14 }}
-          >
+          <button onClick={onCancel} style={{ ...btnStyle("#f5f5f5", DARK_GREEN), flex: 1, padding: "12px 0", fontSize: 14 }}>
             キャンセル
           </button>
-          <button
-            onClick={() => status && onConfirm(status === "used")}
-            style={{
-              flex: 2, padding: "10px 0", border: "none", borderRadius: 8,
-              background: status ? STARBUCKS_GREEN : "#555",
-              color: "#fff", fontFamily: "sans-serif", fontWeight: 700, fontSize: 14,
-              cursor: status ? "pointer" : "default", opacity: status ? 1 : 0.5,
-            }}
-          >
+          <button onClick={() => status && onConfirm(status === "used")} style={{
+            flex: 2, padding: "12px 0", border: "none", borderRadius: 8,
+            background: status ? STARBUCKS_GREEN : "#ccc",
+            color: "#fff", fontFamily: "sans-serif", fontWeight: 700, fontSize: 14,
+            cursor: status ? "pointer" : "default",
+          }}>
             この状態で登録する
           </button>
-        </div>
-      </div>
-
-      {/* 下部：iframeプレビュー */}
-      <div style={{ flex: 1, position: "relative" }}>
-        <iframe
-          src={url}
-          style={{ width: "100%", height: "100%", border: "none" }}
-          title="ギフトページプレビュー"
-        />
-        {/* iframeがブロックされる場合の案内 */}
-        <div style={{
-          position: "absolute", bottom: 12, left: 0, right: 0,
-          display: "flex", justifyContent: "center", pointerEvents: "none",
-        }}>
-          <div style={{
-            background: "rgba(0,0,0,0.6)", color: "#fff", borderRadius: 20,
-            padding: "6px 16px", fontSize: 12, fontFamily: "sans-serif",
-            pointerEvents: "auto",
-          }}>
-            表示されない場合は{" "}
-            <a href={url} target="_blank" rel="noopener noreferrer"
-              style={{ color: GOLD, fontWeight: 700 }}>
-              別タブで開く ↗
-            </a>
-          </div>
         </div>
       </div>
     </div>
@@ -172,7 +138,8 @@ export default function App() {
     };
 
     if (form.giftUrl) {
-      // URLがある → プレビューモーダルを開く
+      // URLがある → 別タブで即座に開きつつモーダルを表示
+      window.open(form.giftUrl, "_blank", "noopener,noreferrer");
       setShowForm(false);
       setCheckingUrl({ url: form.giftUrl, pendingGift, isEdit: editId !== null });
     } else {
@@ -218,8 +185,9 @@ export default function App() {
     setEditId(g.id);
     setShowForm(true);
   }
-  // カードからURLプレビューを開く（使用済み確認用）
+  // カードからURL確認を開く（別タブで即座に開く）
   function openUrlCheck(g) {
+    window.open(g.giftUrl, "_blank", "noopener,noreferrer");
     setCheckingUrl({ url: g.giftUrl, pendingGift: g, isEdit: true });
   }
 
